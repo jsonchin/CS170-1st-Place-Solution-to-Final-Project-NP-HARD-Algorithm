@@ -27,8 +27,8 @@ def improve(knapsack):
   unused_classes = all_classes - classes
   random.shuffle(unused_classes) #add some randomness
   for to_swap_in_class in unused_classes:
-    new_classes = remove_incompatibilities(to_swap_in_classes) #remove any conflicting classes
-    new_classes = add_additional_classes(new_classes, unusued_classes) #try to fill as much as possible
+    new_classes = remove_incompatibilities(classes, to_swap_in_classes) #remove any conflicting classes
+    add_additional_classes(new_classes, unusued_classes) #try to fill as much as possible
 
     resulting_knap = fill_knap_with_items_from_classes(new_classes) #assume we fill it optimally LP/DP or approx
     if resulting_knap.score > knapsack.score: #there was a gain
