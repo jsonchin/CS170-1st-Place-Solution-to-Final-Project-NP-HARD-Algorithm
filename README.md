@@ -137,4 +137,4 @@ Wrote an improvement algorithm. Started from random knapsacks, improved on them 
 
 ## Ending
 
-I really enjoyed working on this project (thinking of different approaches although a lot didn't work, seeing improvements in your score, etc). Thanks to the staff for making this project and the course in general great!
+I really enjoyed working on this project (thinking of different approaches although a lot didn't work, seeing improvements in your score, etc). Thanks to the staff for making this project and the course great!
