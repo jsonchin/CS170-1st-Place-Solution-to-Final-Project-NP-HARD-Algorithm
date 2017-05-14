@@ -1,15 +1,27 @@
-# CS170 Final Project
+# CS170 1st Place Solution to Final Project NP-HARD Algorithm
+
+This is my 1st place solution to the CS170 Final Project (Spring 2017) for an NP-HARD heursitic algorithm to solve the given problem.
+
+## Problem Overview
+
+The problem *PICKITEMS* is an NP-HARD problem that mixes the NP-HARD problem [KNAPSACK](https://en.wikipedia.org/wiki/Knapsack_problem) and the NP-HARD problem [INDEPENDENT SET](https://en.wikipedia.org/wiki/Independent_set_(graph_theory)).
+
+*PICKITEMS* is defined as follows:
+
+We send our professor Prasad to the supermarket with to fill a GargSack (Garg was our other professor) of items that we will buy so that we can resell the items for a profit. Each item has a weight, a cost, a resale value, and a class. Furthermore Prasad is sent with *M* dollars and can only fit *P* pounds worth of items into the GargSack. Addtitionally there are constraints on items based on their classes. For example, if there we buy a desk with class "Wood" and buy a bag of termites with class "Wood Destroyer" then the GargSack will explode and we will get 0 dollars when trying to buy the items. (It's more formally defined as classes are integers and we are given many lists of integers such that buying two different classes of items from the same list will make the GargSack explode.)
+
+KNAPSACK is shown here in trying to fill a knapsack with standard constraints such as weight and cost and INDEPENDENT SET is shown here with the class constraints.
 
 ## Initial Thoughts on the Problem:
 
-The hard part didn't seem to be finding the optimal set of items given a set of classes but rather finding the optimal set of classes across all 2^M subsets of classes.
+The hard part didn't seem to be finding the optimal set of items given a set of classes but rather finding the optimal set of classes across all 2^M subsets of classes for a few reasons. The first is that KNAPSACK is a weak NP-HARD problem meaning that there is a psuedo-polynomial time algorithm to find the optimal solution by using Dynamic Programming whereas INDEPENDENT SET is a NP-HARD problem that does not even have an constant approximation algorithm for it which makes it extremely hard. The second reason is that the hard testcases seemed to have a lot of class constraints which made the problem more weighted towards INDEPENDENT SET. 
 
 Initially there were a few things that came to mind that I wanted to try:
 - Randomized (or add some sort of randomness)
 - Greedy
 - Some sort of improvement
 
-There was no way to be able to go through all combinations of classes so randomized and or greedy seemed like good starting points to finding a good subset of classes. Then the idea was to improve on a given subset of classes.
+There was no way to be able to go through all combinations of classes due to the enormous size of the inputs so randomized and or greedy seemed like good starting points to finding a good subset of classes. Then the idea was to improve on a given subset of classes for a more effective way to go through the search space.
 
 ## Overview of Algorithms
 
@@ -55,7 +67,7 @@ def shotgun():
   return best_knap_so_far
 ```
 
-The **Shotgun** approach worked well for a while but didn't seem to be making a lot of gain for the time spent on each problem so I turned to greedy algorithms. I called these greedy algorithms **Search** in hindsight I have no clue why. There are two ways of greedily filling a knapsack.
+The **Shotgun** approach worked well for a while but didn't seem to be making a lot of gain for the time spent on each problem so I turned to greedy algorithms. I called these greedy algorithms **Search** because they do a little more than just greedy. For each class, we add its incompatibilities to an invalid class set and then try to fill a knapsack ignoring items that have a class contianed in the invalid class set. The idea here was to remedy the problem of greedy algorithms. Greedy is great as a heuristic but falls short due to its shortsighted nature. For example, it gets caught up in trying to choose the "best" choice at a current time which might not be in the optimal solution. By iterating through each class and invalidating its incompatible classes, we effectively allow items of that class to try to be taken up the greedy algorithm without fear of a class incompatible item greedily being taken up by the algorithm first (which would prevent these items from being picked). There are two ways of greedily filling a knapsack once we have invalidated some classes.
 
 - by items
 - by classes
@@ -65,16 +77,18 @@ The first, *by items*, is we look at all items, sort them by some heuristic (a l
 The second, *by classes*, is we look at classes. We can compute statistics (total cost, total weight, total score, total resale value) about each class by summing over all items of a given class. Then perform the same procedure but instead of adding items to the knapsack, add classes to a set and later, fill a knapsack with items from the chosen classes. The hope here was that classes as a whole better represent the possible end result.
 
 ```python
-def search():
+def search(invalid_classes):
   knapsack = Knapsack()
   for item in sorted(items, key=heuristic)[::-1]:
-    knapsack.add_item(item) # only adds it if cost and weight limits are not exceeded and no conflicting items
+    if item.class not in invalid_classes:
+      knapsack.add_item(item) # only adds it if cost and weight limits are not exceeded and no conflicting items
   return knapsack
   
-def search():
+def search(invalid_classes):
   to_use_classes = set()
   for cls in sorted(classes, key=heuristic)[::-1]:
-    to_use_classes.add(cls) # only adds it if no concflicting classes
+    if cls not in invalid_classes and incompatible_classes(cls) not in to_use_classes:
+      to_use_classes.add(cls) # only adds it if no concflicting classes
   knapsack = fill_knap_with_items_from_classes(to_use_classes)
   return knapsack
 ```
@@ -90,6 +104,8 @@ Here are a list of heuristics that I tried (I define score as resale_value - cos
 - pure resale_value
 - resale_value / weight
 - resale_value / (cost + weight)
+
+There was no best heuristic for all testcases. Some worked betters for some than they did for others.
 
 
 One last algorithm I used to touch up my knapsacks was **LP Refine**. It takes in a knapsack, gets its classes, gets all items from those classes, then runs Integer Linear Programming on them. The important thing to note is that all items are compatible with each other so there's only two constraints (weight and cost) so this actually runs fairly quick (30 seconds or less on most testcases)
@@ -133,7 +149,7 @@ I rewrote most of my code in Java a week before submission to speed up **Improve
 
 ## tldr
 
-Wrote an improvement algorithm. Started from random knapsacks, improved on them with the improvement algorithm. Tried lots of greedy heuristics, improved on the knapsacks they prodcued with the improvement algorithm.
+Wrote an improvement algorithm. Started from random knapsacks, improved on them with the improvement algorithm. Tried lots of greedy heuristics, improved on the knapsacks they produced with the improvement algorithm.
 
 ## Ending
 
